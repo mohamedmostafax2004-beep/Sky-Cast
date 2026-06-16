@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const dataDir = path.join(__dirname, '../../data');
+const isVercel = process.env.VERCEL === '1' || !!process.env.VERCEL;
+const dataDir = isVercel ? '/tmp' : path.join(__dirname, '../../data');
 const dbFile = path.join(dataDir, 'skycast-local-db.json');
 
 const emptyDb = () => ({
