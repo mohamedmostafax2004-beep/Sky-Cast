@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "username": "testuser",
+      "password": "$2a$10$aODHJqEiRjDvoqs5QjttTuTUgGVXar.D2kOLLyq8byL9syKppoVcm",
+      "email": "testuser@example.com",
+      "emailVerified": true,
+      "preferences": {
+        "units": "metric",
+        "defaultLat": 31.2653,
+        "defaultLng": 32.3019,
+        "defaultZoom": 13,
+        "weatherAlerts": true,
+        "tempAlertHigh": 38,
+        "tempAlertLow": 5,
+        "precipAlertMm": 20
+      },
+      "createdAt": "2026-06-15T03:13:15.066Z",
+      "_id": "62655024d7a66f3ab3c5bf78"
+    },
+    {
+      "username": "momo",
+      "password": "$2a$10$cCQfdhjtgFu/s54RfdWY.u7al2FbmAd0rdrG22vsCspyxBJX3cL8S",
+      "email": "momo@gmail.com",
+      "emailVerified": true,
+      "preferences": {
+        "units": "metric",
+        "defaultLat": 31.2653,
+        "defaultLng": 32.3019,
+        "defaultZoom": 13,
+        "weatherAlerts": true,
+        "tempAlertHigh": 38,
+        "tempAlertLow": 5,
+        "precipAlertMm": 20
+      },
+      "createdAt": "2026-06-16T21:48:54.866Z",
+      "_id": "72820b966cb40626ee525d21",
+      "lastLogin": "2026-06-16T21:57:05.244Z"
+    }
+  ],
+  "savedLocations": [],
+  "mapMarkers": []
+}

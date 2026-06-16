@@ -1,0 +1,250 @@
+/* Modern Context Menu Styles */
+#context-menu {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 1000;
+    min-width: 200px;
+    animation: contextMenuSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: top left;
+}
+
+@keyframes contextMenuSlideIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Coordinates Display */
+.context-coords {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(71, 45, 187, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.context-coords::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Menu Items */
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin: 2px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    user-select: none;
+}
+
+.context-menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+.context-menu-item:hover {
+    color: white;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(71, 45, 187, 0.3);
+}
+
+.context-menu-item:hover::before {
+    width: 100%;
+}
+
+.context-menu-item:active {
+    transform: translateX(2px) scale(0.98);
+}
+
+/* Icons */
+.context-menu-icon {
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.context-menu-item:hover .context-menu-icon {
+    transform: scale(1.1);
+}
+
+/* Separator */
+.context-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+    margin: 8px 0;
+}
+
+/* Input Field for Marker Name */
+.context-input {
+    padding: 12px 16px;
+    margin: 8px 0;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.context-input:focus {
+    border-color: #472dbb;
+    box-shadow: 0 0 0 3px rgba(71, 45, 187, 0.1);
+    background: white;
+}
+
+/* Action Buttons */
+.context-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.context-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.context-btn-primary {
+    background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(71, 45, 187, 0.3);
+}
+
+.context-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(71, 45, 187, 0.4);
+}
+
+.context-btn-secondary {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.context-btn-secondary:hover {
+    background: rgba(108, 117, 125, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Loading State */
+.context-menu-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e1e5e9;
+    border-top: 2px solid #472dbb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    #context-menu {
+        min-width: 180px;
+        font-size: 13px;
+    }
+    
+    .context-menu-item {
+        padding: 10px 12px;
+    }
+    
+    .context-coords {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    #context-menu {
+        background: rgba(30, 30, 30, 0.95);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+    }
+    
+    .context-menu-item {
+        color: #e0e0e0;
+    }
+    
+    .context-input {
+        background: rgba(40, 40, 40, 0.8);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+    }
+    
+    .context-input:focus {
+        background: rgba(50, 50, 50, 0.9);
+    }
+}

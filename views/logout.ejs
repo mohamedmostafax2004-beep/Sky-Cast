@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout - SkyCast</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .logout-container {
+            text-align: center;
+            padding: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .logout-message {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .logout-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logout-container">
+            <h2>Logout</h2>
+            <div class="logout-message">
+                Are you sure you want to logout?
+            </div>
+            <div class="logout-actions">
+                <form action="/logout" method="post" style="margin:0;">
+                    <button type="submit" class="logout-btn">Yes, Logout</button>
+                </form>
+                <a href="/" class="back-btn">Cancel - Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

@@ -1,0 +1,3302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, private">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>SkyCast - Interactive Map Dashboard</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#472dbb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+       <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet">
+<!-- Search bar CSS (Leaflet Search) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-search/dist/leaflet-search.min.css" />
+<!-- Geocoder CSS (Leaflet Control Geocoder) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/context-menu.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        /* Enhanced Header Section */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(218, 214, 214, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            gap: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 200px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #472dbb;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .welcome-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Search Section */
+        .search-section {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: #999;
+            font-size: 16px;
+            z-index: 2;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #472dbb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(71, 45, 187, 0.1);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-icon {
+            color: #472dbb;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .search-result-text {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .search-result-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+
+        /* User Section */
+        .user-section {
+            min-width: 200px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .user-status {
+            color: #2ed573;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-toggle:hover {
+            background: rgba(71, 45, 187, 0.1);
+            color: #472dbb;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #472dbb;
+        }
+
+        .dropdown-item.logout {
+            color: #ff4757;
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: #fff5f5;
+        }
+
+        .dropdown-divider {
+            margin: 5px 0;
+            border: none;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(71, 45, 187, 0.3);
+        }
+
+        .btn-outline-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #472dbb;
+            border: 2px solid #472dbb;
+        }
+
+        .btn-outline-primary:hover {
+            background: #472dbb;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #472dbb;
+        }
+
+        .logo i {
+            font-size: 28px;
+            background: linear-gradient(135deg, #472dbb, #6c5ce7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-text {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #472dbb, #6c5ce7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #472dbb, #6c5ce7);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(71, 45, 187, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #472dbb;
+            border: 2px solid #472dbb;
+        }
+
+        .btn-secondary:hover {
+            background: #472dbb;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Map Container */
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            margin-top: 80px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        /* Enhanced Control Panel */
+        .control-panel {
+            position: fixed;
+            top: 100px;
+            left: 30px;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            min-width: 280px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            transform: translateX(-150%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .control-panel.show {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Floating Map Controls Button */
+        .controls-fab {
+            position: fixed;
+            left: 30px;
+            top: 100px;
+            z-index: 998;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease, background 0.3s;
+        }
+
+        .controls-fab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+            background: linear-gradient(135deg, #37229b 0%, #5b4cd7 100%);
+        }
+
+        .controls-fab.hidden {
+            transform: scale(0) rotate(-90deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .controls-fab i { font-size: 20px; }
+
+        .control-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 12px 24px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .control-panel h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 10px solid rgba(7, 7, 7, 0.1);
+        }
+
+        .control-panel h3 i {
+            color: #472dbb;
+            font-size: 18px;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .control-item:hover {
+            transform: translateX(8px) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(71, 45, 187, 0.2);
+            border-color: rgba(71, 45, 187, 0.3);
+        }
+
+        .control-item:hover::before {
+            width: 100%;
+        }
+
+        .control-item:hover i,
+        .control-item:hover span {
+            color: white;
+        }
+
+        .control-item:active {
+            transform: translateX(4px) translateY(-1px) scale(0.98);
+        }
+
+        .control-item i {
+            color: #472dbb;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .control-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .control-item span {
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        /* Active/Selected State */
+        .control-item.active {
+            background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(71, 45, 187, 0.3);
+        }
+
+        .control-item.active i,
+        .control-item.active span {
+            color: white;
+        }
+
+        /* Loading State */
+        .control-item.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .control-item.loading i {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Control Status Indicators */
+        .control-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .control-item:hover .control-status {
+            opacity: 1;
+            transform: translateX(-2px);
+        }
+
+        /* Status indicators */
+        .status-online {
+            color: #2ed573;
+        }
+
+        .status-offline {
+            color: #ff4757;
+        }
+
+        .status-loading {
+            color: #ffa502;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            background: rgba(218, 214, 214, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 200px;
+        }
+
+        .stats-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            color: #472dbb;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #472dbb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .control-panel {
+                left: 15px;
+                top: 120px;
+                min-width: 200px;
+            }
+
+            .stats-panel {
+                bottom: 15px;
+                right: 15px;
+                min-width: 150px;
+            }
+
+            .map-container {
+                margin-top: 120px;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        /* Notification Styles */
+        .notification {
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-content i {
+            font-size: 16px;
+        }
+
+        /* Ensure Leaflet controls (search / geocoder) are visible below the fixed header */
+        .leaflet-control-container .leaflet-top {
+            top: 80px !important; /* match header height */
+        }
+
+        .leaflet-control-geocoder,
+        .leaflet-control-search {
+            z-index: 1100 !important;
+        }
+
+
+        /* Enhanced Weather Modal Styles */
+        .weather-modal {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .weather-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: weatherFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes weatherFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .weather-header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .weather-icon-large {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.9);
+            animation: weatherPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes weatherPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .weather-title-section h4 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .weather-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 5px 0 0 0;
+            font-size: 1rem;
+        }
+
+        .weather-body {
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .weather-status-banner {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+        }
+
+        .status-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .weather-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .weather-feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .weather-feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .weather-feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .weather-feature-card[data-feature="temperature"] .feature-icon {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .weather-feature-card[data-feature="precipitation"] .feature-icon {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+        }
+
+        .weather-feature-card[data-feature="wind"] .feature-icon {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+        }
+
+        .weather-feature-card[data-feature="air-quality"] .feature-icon {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+        }
+
+        .weather-feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-content h6 {
+            color: #2d3436;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .feature-content p {
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .feature-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .feature-action {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ddd;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .weather-feature-card:hover .feature-action {
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .weather-feature-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .weather-feature-card.active .feature-content h6,
+        .weather-feature-card.active .feature-content p {
+            color: white;
+        }
+
+        .weather-feature-card.active .feature-action {
+            color: white;
+        }
+
+        .weather-feature-card.active::before {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scaleX(1);
+        }
+
+        .weather-visualization {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            color: #2d3436;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .section-title i {
+            color: #667eea;
+        }
+
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-header h6 {
+            color: #2d3436;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-controls .btn {
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-controls .btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .chart-canvas-wrap {
+            position: relative;
+            height: 220px;
+            min-height: 220px;
+        }
+
+        .chart-canvas-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .chart-placeholder {
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #636e72;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .chart-placeholder.chart-error {
+            border-color: #ff6b7a;
+            color: #c0392b;
+        }
+
+        .chart-placeholder i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #adb5bd;
+        }
+
+        .weather-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-label {
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date-range-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-range-picker .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .date-range-picker .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .date-separator {
+            color: #636e72;
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .form-check-label {
+            color: #2d3436;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .weather-footer {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            padding: 20px 30px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .footer-actions .btn {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Enhanced Weather Modal Body Styles */
+        .weather-header-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .location-info, .date-range-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .location-info:last-child, .date-range-info:last-child {
+            margin-bottom: 0;
+        }
+
+        .location-text, .date-text {
+            font-size: 1rem;
+            color: #2d3436;
+        }
+
+        .weather-divider {
+            border: none;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 20px 0;
+        }
+
+        .section-title {
+            color: #2d3436;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .weather-day-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .weather-day-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .day-date {
+            font-weight: 700;
+            color: #2d3436;
+            font-size: 1.1rem;
+        }
+
+        .day-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #28a745;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .weather-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .temperature-card:hover {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+        }
+
+        .precipitation-card:hover {
+            border-color: #74b9ff;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        }
+
+        .wind-card:hover {
+            border-color: #a29bfe;
+            background: linear-gradient(135deg, #f8f6ff 0%, #f0edff 100%);
+        }
+
+        .air-quality-card:hover {
+            border-color: #00b894;
+            background: linear-gradient(135deg, #f0fff4 0%, #e8f8f0 100%);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .metric-header i {
+            font-size: 1.2rem;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #2d3436;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .metric-analysis {
+            font-size: 0.8rem;
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .weather-summary {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .summary-card i {
+            font-size: 1.1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .weather-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .day-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        /* AI Chatbot Styles */
+        .chatbot-modal {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 20px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chatbot-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: chatbotFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes chatbotFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+
+        .chatbot-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .chatbot-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            animation: chatbotPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes chatbotPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .chatbot-info h5 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .chatbot-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        .chatbot-body {
+            padding: 0;
+            background: #f8f9fa;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .chat-message {
+            display: flex;
+            margin-bottom: 15px;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .bot-message .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 80%;
+        }
+
+        .message-text {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #2d3436;
+            white-space: normal;
+        }
+
+        .chat-message[dir="rtl"] .message-text {
+            text-align: right;
+            direction: rtl;
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+
+        .chat-message[dir="rtl"] .message-avatar {
+            margin-right: 0;
+            margin-left: 10px;
+        }
+
+        .user-message .message-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #636e72;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .user-message .message-time {
+            text-align: left;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .quick-questions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            max-height: 140px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .quick-prompts-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #636e72;
+            margin: 8px 0 4px;
+            width: 100%;
+        }
+
+        .quick-question-btn {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: #2d3436;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quick-question-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-input-container {
+            position: relative;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 25px;
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.9rem;
+            color: #2d3436;
+            padding: 8px 0;
+        }
+
+        .chat-input::placeholder {
+            color: #adb5bd;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .input-hints {
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .input-hints small {
+            color: #636e72;
+            font-size: 0.75rem;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #636e72;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: #636e72;
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .weather-features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .visualization-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Floating AI Assistant Button */
+        .ai-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1500;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .ai-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+        }
+
+        .ai-fab i { font-size: 20px; }
+
+        .logged-user-info .user-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .logged-user-info .btn { text-decoration: none; }
+        .auth-buttons .btn { text-decoration: none; }
+        @media (max-width: 900px) {
+            .user-details { display: none; }
+            .user-profile-btn span, .user-logout-btn span { display: none; }
+        }
+
+
+        .logged-user-info {
+            gap: 10px;
+        }
+
+        .user-profile-btn,
+        .user-logout-btn {
+            padding: 9px 14px;
+            border-radius: 18px;
+            white-space: nowrap;
+        }
+
+        .theme-control-item {
+            justify-content: space-between;
+            cursor: default !important;
+        }
+
+        .theme-control-item:hover {
+            transform: none !important;
+        }
+
+        .control-theme-toggle {
+            left: 0 !important;
+            margin-left: auto;
+            padding: 3px;
+            transform: none;
+            transform-origin: right center;
+        }
+
+        .control-theme-toggle button {
+            width: 32px;
+            height: 32px;
+            font-size: 15px;
+        }
+
+        .control-theme-toggle .toggle-bg {
+            width: 32px;
+            height: 32px;
+            top: 3px;
+            left: 3px;
+        }
+
+        .control-theme-toggle.dark-active .toggle-bg {
+            transform: translateX(34px);
+        }
+    </style>
+</head>
+<body>
+    <script>window.SKYCAST_USER_ID = <%- JSON.stringify(typeof userId !== 'undefined' && userId ? String(userId) : null) %>;
+    window.SKYCAST_SERVER_USER = <%- JSON.stringify(typeof user !== 'undefined' && user ? String(user) : null) %>;</script>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Floating Map Controls Button -->
+    <button class="controls-fab" aria-label="Toggle Map Controls" onclick="toggleControlPanel(event)">
+        <i class="fas fa-layer-group"></i>
+    </button>
+
+    <!-- Enhanced Header with Search and Auth -->
+    <header class="header fade-in">
+        <div class="logo-section">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>SkyCast</span>
+            </div>
+            <div class="welcome-text">
+                Interactive Map Dashboard
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="mapSearch" class="search-input" placeholder="Search locations..." autocomplete="off">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-tools d-flex align-items-center gap-2 flex-shrink-0">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="unitsToggleBtn" onclick="toggleUnits()" title="Toggle units">°C / mm</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="runOnboardingTour()" title="Help tour"><i class="fas fa-question-circle"></i></button>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="shareWeatherView()" title="Copy share link"><i class="fas fa-share-alt"></i></button>
+        </div>
+        
+        <!-- User Section -->
+        <div class="user-section" id="userSection">
+            <% if (user) { %>
+                <div class="user-info logged-user-info">
+                    <div class="user-avatar"><%= user.charAt(0).toUpperCase() %></div>
+                    <div class="user-details">
+                        <div class="user-name"><%= user %></div>
+                        <div class="user-status">Signed in</div>
+                    </div>
+                    <a href="/profile" class="btn btn-outline-primary user-profile-btn">
+                        <i class="fas fa-user"></i> <span>Profile</span>
+                    </a>
+                    <a href="/logout" class="btn btn-primary user-logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="auth-buttons">
+                    <a href="/login" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="/signup" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </header>
+
+    <!-- Enhanced Control Panel -->
+    <div class="control-panel">
+
+  <!-- العنوان -->
+  <div class="control-header" id="controlHeader">
+  <h3>
+    <i class="fas fa-cog"></i> 
+    Map Controls
+  </h3>
+  <div style="display: flex; gap: 15px; align-items: center;">
+      <i class="fas fa-chevron-down" id="arrowIcon" title="Toggle List"></i>
+      <i class="fas fa-times" id="closePanelIcon" style="color: #ff4757; font-size: 22px; cursor: pointer; transition: 0.3s;" title="Close Panel" onclick="toggleControlPanel(event)"></i>
+  </div>
+</div>
+
+  <!-- المحتوى -->
+  <div class="control-content" id="controlContent">
+
+    <div class="control-item theme-control-item" onclick="event.stopPropagation()">
+      <i class="fas fa-adjust"></i>
+      <span>Theme Mode</span>
+      <div class="theme-toggle control-theme-toggle">
+        <button id="lightBtn" class="active" type="button" title="Light mode">
+          <span class="icon">☀️</span>
+        </button>
+        <button id="darkBtn" type="button" title="Dark mode">
+          <span class="icon">🌙</span>
+        </button>
+        <div class="toggle-bg"></div>
+      </div>
+    </div>
+
+    <div class="control-item" onclick="toggleLocationTracking()">
+      <i class="fas fa-crosshairs"></i>
+      <span>Location Tracking</span>
+    </div>
+
+    <div class="control-item" onclick="toggleMapLayers()">
+      <i class="fas fa-layer-group"></i>
+      <span>Map Layers</span>
+    </div>
+
+    <div class="control-item" onclick="showSavedLocations()">
+      <i class="fas fa-bookmark"></i>
+      <span>Saved Locations</span>
+    </div>
+
+    <div class="control-item" onclick="exportMapData()">
+      <i class="fas fa-download"></i>
+      <span>Export Data</span>
+    </div>
+
+    <div class="control-item" onclick="showWeatherInfo()">
+      <i class="fas fa-cloud-sun"></i>
+      <span>Weather Info</span>
+    </div>
+
+    <div class="control-item" onclick="showAIChatbot()">
+      <i class="fas fa-robot"></i>
+      <span>AI Weather Assistant</span>
+    </div>
+
+    <div class="control-item" onclick="showCompareLocations()">
+      <i class="fas fa-balance-scale"></i>
+      <span>Compare Locations</span>
+    </div>
+
+    <div class="control-item" onclick="syncLocalDataToCloud()">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <span>Sync to Cloud</span>
+    </div>
+
+    <button type="button" id="pwaInstallBtn" class="control-item border-0 bg-transparent w-100 text-start" style="display:none;" onclick="installPwa()">
+      <i class="fas fa-download"></i>
+      <span>Install App</span>
+    </button>
+
+    <div class="control-item" onclick="showMarkerManager()">
+      <i class="fas fa-map-pin"></i>
+      <span>Manage Markers</span>
+    </div>
+
+    <div class="control-item" onclick="toggleMeasureTool()">
+      <i class="fas fa-ruler"></i>
+      <span>Measure Distance</span>
+    </div>
+
+    <div class="control-item" onclick="clearAllMarkers()">
+      <i class="fas fa-trash-alt"></i>
+      <span>Clear Markers</span>
+    </div>
+
+  </div>
+</div>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel slide-in-right">
+        <h3><i class="fas fa-chart-line"></i> Statistics</h3>
+        <div class="stat-item">
+            <span class="stat-label">Current Location</span>
+            <span class="stat-value" id="currentLocation">Loading...</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Accuracy</span>
+            <span class="stat-value" id="locationAccuracy">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Markers Added</span>
+            <span class="stat-value" id="markerCount">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Locations Saved</span>
+            <span class="stat-value" id="savedCount">0</span>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- Floating AI Assistant Button -->
+    <button class="ai-fab" aria-label="Open AI Weather Assistant" onclick="showAIChatbot()">
+        <i class="fas fa-robot"></i>
+    </button>
+
+<!-- Bootstrap Modals for Control Panel -->
+
+<!-- Location Tracking Modal -->
+<div class="modal fade" id="locationTrackingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-crosshairs"></i> Location Tracking</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+          <h6>Current Status</h6>
+          <div class="alert alert-info" id="trackingStatusInfo">
+            <i class="fas fa-spinner fa-spin"></i> Checking location tracking status...
+          </div>
+          <p class="text-muted">Location tracking allows the map to follow your current position and display your location with accuracy information.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="confirmToggleTracking()">Toggle Tracking</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Map Layers Modal -->
+<div class="modal fade" id="mapLayersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-layer-group"></i> Map Layers</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Base Layers</h6>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="baseLayer" id="jawgLayer"<%= (typeof jawgAccessToken !== 'undefined' && jawgAccessToken) ? ' checked' : '' %>>
+              <label class="form-check-label" for="jawgLayer">
+                Jawg Lagoon<%= (typeof jawgAccessToken !== 'undefined' && jawgAccessToken) ? ' (Current)' : '' %>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="baseLayer" id="osmLayer"<%= (typeof jawgAccessToken === 'undefined' || !jawgAccessToken) ? ' checked' : '' %>>
+              <label class="form-check-label" for="osmLayer">
+                OpenStreetMap
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="baseLayer" id="satelliteLayer">
+              <label class="form-check-label" for="satelliteLayer">
+                Satellite
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="baseLayer" id="terrainBaseLayer">
+              <label class="form-check-label" for="terrainBaseLayer">
+                Terrain (Topographic)
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="baseLayer" id="darkLayer">
+              <label class="form-check-label" for="darkLayer">
+                Dark Mode
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6>Overlay Layers</h6>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="trafficLayer">
+              <label class="form-check-label" for="trafficLayer">
+                Traffic Information
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="weatherLayer">
+              <label class="form-check-label" for="weatherLayer">
+                Weather Overlay
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="terrainOverlayLayer">
+              <label class="form-check-label" for="terrainOverlayLayer">
+                Terrain Hillshade
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-success mt-3">
+          <i class="fas fa-check-circle"></i> Map layers are now available! Switch between different map styles and add overlay information.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="applyMapLayers()">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Saved Locations Modal -->
+<div class="modal fade" id="savedLocationsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-bookmark"></i> Saved Locations</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="savedLocationsList">
+          <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+            <p class="mt-2">Loading saved locations...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" onclick="clearAllSavedLocations()">Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Data Modal -->
+<div class="modal fade" id="exportDataModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-download"></i> Export Map Data</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Export Format</label>
+          <select class="form-select" id="exportFormat">
+            <option value="json">JSON</option>
+            <option value="csv">CSV</option>
+            <option value="kml">KML</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Include Data</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeMarkers" checked>
+            <label class="form-check-label" for="includeMarkers">
+              Custom Markers
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeSaved" checked>
+            <label class="form-check-label" for="includeSaved">
+              Saved Locations
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeStats" checked>
+            <label class="form-check-label" for="includeStats">
+              Statistics
+            </label>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i> The exported file will contain all selected data in the chosen format.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="performExport()">Export Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Weather Info Modal -->
+<div class="modal fade" id="weatherInfoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content weather-modal">
+      <div class="modal-header weather-header">
+        <div class="weather-header-content">
+          <div class="weather-icon-large">
+            <i class="fas fa-cloud-sun"></i>
+          </div>
+          <div class="weather-title-section">
+            <h4 class="modal-title">Weather Information</h4>
+            <p class="weather-subtitle">Real-time weather data for any location</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body weather-body">
+        <!-- Weather Status Banner -->
+        <div class="weather-status-banner">
+          <div class="status-content">
+            <i class="fas fa-info-circle"></i>
+            <span>Click the map to pick a location, set dates below, then press <strong>Get Weather Data</strong>.</span>
+          </div>
+          <div class="mt-2 small">
+            <i class="fas fa-map-marker-alt text-primary"></i>
+            <strong>Selected:</strong>
+            <span id="weatherSelectedLocation" class="text-muted">Click the map or right-click a point</span>
+          </div>
+        </div>
+
+        <!-- Interactive Weather Features Grid -->
+        <div class="weather-features-grid">
+          <div class="weather-feature-card" data-feature="temperature">
+            <div class="feature-icon">
+              <i class="fas fa-thermometer-half"></i>
+            </div>
+            <div class="feature-content">
+              <h6>Temperature Analysis</h6>
+              <p>Current conditions & 10-year historical data</p>
+              <div class="feature-tags">
+                <span class="tag">Real-time</span>
+                <span class="tag">Historical</span>
+              </div>
+            </div>
+            <div class="feature-action">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+
+          <div class="weather-feature-card" data-feature="precipitation">
+            <div class="feature-icon">
+              <i class="fas fa-cloud-rain"></i>
+            </div>
+            <div class="feature-content">
+              <h6>Precipitation Data</h6>
+              <p>Rainfall patterns & precipitation analysis</p>
+              <div class="feature-tags">
+                <span class="tag">Rainfall</span>
+                <span class="tag">Snow</span>
+              </div>
+            </div>
+            <div class="feature-action">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+
+          <div class="weather-feature-card" data-feature="wind">
+            <div class="feature-icon">
+              <i class="fas fa-wind"></i>
+            </div>
+            <div class="feature-content">
+              <h6>Wind Analysis</h6>
+              <p>Wind speed, direction & patterns</p>
+              <div class="feature-tags">
+                <span class="tag">Speed</span>
+                <span class="tag">Direction</span>
+              </div>
+            </div>
+            <div class="feature-action">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+
+          <div class="weather-feature-card" data-feature="air-quality">
+            <div class="feature-icon">
+              <i class="fas fa-leaf"></i>
+            </div>
+            <div class="feature-content">
+              <h6>Air Quality</h6>
+              <p>Aerosol optical depth & air quality metrics</p>
+              <div class="feature-tags">
+                <span class="tag">AOD</span>
+                <span class="tag">Quality</span>
+              </div>
+            </div>
+            <div class="feature-action">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Data Visualization -->
+        <div class="weather-visualization">
+          <h5 class="section-title">
+            <i class="fas fa-chart-line"></i>
+            Weather Data Visualization
+          </h5>
+          <div class="visualization-grid">
+            <div class="chart-container">
+              <div class="chart-header">
+                <h6>Temperature Trends</h6>
+                <div class="chart-controls">
+                  <button class="btn btn-sm btn-outline-primary active" data-period="7d">7 Days</button>
+                  <button class="btn btn-sm btn-outline-primary" data-period="30d">30 Days</button>
+                  <button class="btn btn-sm btn-outline-primary" data-period="1y">1 Year</button>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <div class="chart-placeholder">
+                  <i class="fas fa-chart-area"></i>
+                  <p>Click <strong>Get Weather Data</strong> to load the temperature chart</p>
+                </div>
+                <canvas id="temperatureChart" height="220" style="display:none;"></canvas>
+              </div>
+            </div>
+            
+            <div class="chart-container">
+              <div class="chart-header">
+                <h6>Precipitation Analysis</h6>
+                <div class="chart-controls">
+                  <button class="btn btn-sm btn-outline-primary active" data-type="rain">Rain</button>
+                  <button class="btn btn-sm btn-outline-primary" data-type="snow">Snow</button>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <div class="chart-placeholder">
+                  <i class="fas fa-chart-bar"></i>
+                  <p>Click <strong>Get Weather Data</strong> to load precipitation data</p>
+                </div>
+                <canvas id="precipitationChart" height="220" style="display:none;"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <div class="chart-header"><h6>Wind Speed</h6></div>
+              <div class="chart-canvas-wrap">
+                <div class="chart-placeholder"><i class="fas fa-wind"></i><p>Wind chart loads with weather data</p></div>
+                <canvas id="windChart" height="220" style="display:none;"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <div class="chart-header"><h6>Air Quality (AOD)</h6></div>
+              <div class="chart-canvas-wrap">
+                <div class="chart-placeholder"><i class="fas fa-leaf"></i><p>Air quality chart loads with weather data</p></div>
+                <canvas id="aodChart" height="220" style="display:none;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Controls -->
+        <div class="weather-controls">
+          <h5 class="section-title">
+            <i class="fas fa-cog"></i>
+            Weather Controls
+          </h5>
+          <div class="controls-grid">
+            <div class="control-group">
+              <label class="control-label">Date Range</label>
+              <div class="mb-2 d-flex flex-wrap gap-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyDatePreset('7d')">Last 7 days</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyDatePreset('30d')">Last 30 days</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyDatePreset('1y')">Last year</button>
+              </div>
+              <div class="date-range-picker">
+                <input type="date" class="form-control" id="weatherStartDate">
+                <span class="date-separator">to</span>
+                <input type="date" class="form-control" id="weatherEndDate">
+              </div>
+            </div>
+            <div id="weatherAlertsBox" class="mt-3"></div>
+            
+            <div class="control-group">
+              <label class="control-label">Data Types</label>
+              <div class="checkbox-group">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="tempData" checked>
+                  <label class="form-check-label" for="tempData">Temperature</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="precipData" checked>
+                  <label class="form-check-label" for="precipData">Precipitation</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="windData" checked>
+                  <label class="form-check-label" for="windData">Wind</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="aodData" checked>
+                  <label class="form-check-label" for="aodData">Air Quality</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer weather-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Close
+          </button>
+          <button type="button" class="btn btn-primary" onclick="getWeatherData()">
+            <i class="fas fa-cloud-download-alt"></i> Get Weather Data
+          </button>
+          <button type="button" class="btn btn-success" onclick="exportWeatherData()">
+            <i class="fas fa-file-pdf"></i> Export PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Weather Chatbot Modal -->
+<div class="modal fade" id="aiChatbotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content chatbot-modal">
+      <div class="modal-header chatbot-header">
+        <div class="chatbot-title-section">
+          <div class="chatbot-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="chatbot-info">
+            <h5 class="modal-title">SkyCast Assistant · مساعد SkyCast</h5>
+            <p class="chatbot-subtitle">Ask in English or Arabic — weather, map, clothing, activities, compare & export.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body chatbot-body">
+        <!-- Chat Messages Area -->
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message bot-message" dir="ltr">
+            <div class="message-avatar">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+              <div class="message-text">
+                <strong>Welcome / أهلًا!</strong> Ask in <strong>English or Arabic</strong> — any wording.
+                <ul>
+                  <li>🌤️ Weather & NASA POWER charts</li>
+                  <li>👕 Clothing · 🏕️ Going out · 🏃 Sports</li>
+                  <li>🗺️ Map, markers, save places, compare, export PDF</li>
+                </ul>
+                <em>Do I need an umbrella?</em> · <em>ماذا أرتدي؟</em> · <em>Compare two locations</em>
+              </div>
+              <div class="message-time">Now</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chat Input Area -->
+        <div class="chat-input-area">
+          <div class="quick-questions" id="chatQuickPrompts"></div>
+          
+          <div class="chat-input-container">
+            <div class="input-wrapper">
+              <input type="text" id="chatInput" class="chat-input" placeholder="Ask in English or Arabic / اسأل هنا..." maxlength="500" dir="auto">
+              <button class="send-button" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <div class="input-hints">
+              <small>Type freely — e.g. “Is it good for running?” · “كيف أقارن مدينتين؟” · “What can you do?”</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Compare Locations Modal -->
+<div class="modal fade" id="compareModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-balance-scale"></i> Compare Two Locations</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Click the map to select a point, then assign it to Location A or B.</p>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h6>Location A</h6>
+              <p id="compareLocA" class="small text-muted">Not set</p>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="setCompareSlot('A')">Set A from map</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h6>Location B</h6>
+              <p id="compareLocB" class="small text-muted">Not set</p>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="setCompareSlot('B')">Set B from map</button>
+            </div>
+          </div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-5"><label class="form-label">Start</label><input type="date" class="form-control" id="compareStartDate"></div>
+          <div class="col-md-5"><label class="form-label">End</label><input type="date" class="form-control" id="compareEndDate"></div>
+          <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-primary w-100" onclick="runLocationCompare()">Compare</button></div>
+        </div>
+        <div id="compareLoading" style="display:none;" class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+        <div id="compareSummary" class="row g-2 mb-3"></div>
+        <div class="row">
+          <div class="col-md-6"><div style="height:220px;"><canvas id="compareChartA"></canvas></div></div>
+          <div class="col-md-6"><div style="height:220px;"><canvas id="compareChartB"></canvas></div></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" onclick="downloadWeatherPdf()"><i class="fas fa-file-pdf"></i> Export comparison PDF</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Marker Manager Modal -->
+<div class="modal fade" id="markerManagerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-map-pin"></i> Manage Markers</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="markerManagerList"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clear Markers Modal -->
+<div class="modal fade" id="clearMarkersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-trash-alt"></i> Clear Markers</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+          <h6>Are you sure?</h6>
+          <p class="text-muted">This action will remove all custom markers from the map. This cannot be undone.</p>
+          <div class="alert alert-warning">
+            <i class="fas fa-info-circle"></i> <strong id="markerCountWarning">0</strong> markers will be removed.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="confirmClearMarkers()">Clear All Markers</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Weather Modal (existing) -->
+<div class="modal fade" id="weatherModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header modal_bots text-white">
+        <h5 class="modal-title"><i class="fas fa-cloud-sun"></i> Weather Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="weatherModalBody">
+        <!-- Data from JS will appear here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Date Input -->
+<div class="modal fade" id="dateModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Date Range</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dateForm">
+          <div class="mb-3">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" required>
+          </div>
+          <div class="mb-3">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Get Data</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+  </script>
+  <script>
+    
+    
+    // Dark Mode Functionality for SkyCast
+let lightBtn = document.getElementById("lightBtn");
+let darkBtn = document.getElementById("darkBtn");
+let toggle = document.querySelector(".theme-toggle");
+
+// Dark mode CSS variables
+const darkModeStyles = `
+    <style id="darkModeStyles">
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .logo span,
+        body.dark-mode .welcome-text,
+        body.dark-mode .user-name,
+        body.dark-mode .control-panel h3,
+        body.dark-mode .stats-panel h3 {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .logo { color: #818cf8; }
+        body.dark-mode .logo i { color: #818cf8; }
+        
+        body.dark-mode .search-input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .search-input:focus {
+            background: rgba(30, 41, 59, 1);
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        
+        body.dark-mode .search-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .control-panel {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .control-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .control-item span {
+            color: #cbd5e1;
+        }
+        
+        body.dark-mode .control-item i {
+            color: #818cf8;
+        }
+        
+        body.dark-mode .control-item:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        body.dark-mode .control-item.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        }
+        
+        body.dark-mode .stats-panel {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        body.dark-mode .stat-label {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .stat-value {
+            color: #818cf8;
+        }
+        
+        body.dark-mode .stat-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .user-details .user-name {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .user-status {
+            color: #10b981;
+        }
+        
+        body.dark-mode .dropdown-menu {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        body.dark-mode .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .dropdown-item {
+            color: #cbd5e1;
+        }
+        
+        body.dark-mode .dropdown-item:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+        }
+        
+        body.dark-mode .modal-content {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        body.dark-mode .modal-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .modal-body,
+        body.dark-mode .weather-body {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e293b;
+        }
+        
+        body.dark-mode .weather-feature-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        body.dark-mode .weather-feature-card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .weather-feature-card .feature-content h6 {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .weather-feature-card .feature-content p {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .weather-status-banner {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .weather-visualization,
+        body.dark-mode .weather-controls {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .section-title {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .chart-container {
+            background: #0f172a;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .chart-header h6 {
+            color: #cbd5e1;
+        }
+        
+        body.dark-mode .chart-placeholder {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .chat-messages {
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .message-text {
+            background: #1e293b;
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .user-message .message-text {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        }
+        
+        body.dark-mode .chat-input-area {
+            background: #1e293b;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .input-wrapper {
+            background: #0f172a;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .input-wrapper:focus-within {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        
+        body.dark-mode .chat-input {
+            background: transparent;
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .quick-question-btn {
+            background: #0f172a;
+            color: #cbd5e1;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .quick-question-btn:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        body.dark-mode .btn-outline-secondary {
+            color: #cbd5e1;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-mode .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+            background: #0f172a;
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .form-control:focus {
+            background: #0f172a;
+            border-color: #818cf8;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        
+        body.dark-mode .form-label,
+        body.dark-mode .control-label,
+        body.dark-mode .form-check-label {
+            color: #cbd5e1;
+        }
+        
+        body.dark-mode .alert-info {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+        }
+        
+        body.dark-mode .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+        
+        body.dark-mode .search-results {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        body.dark-mode .search-result-item {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .search-result-name {
+            color: #f1f5f9;
+        }
+        
+        body.dark-mode .search-result-type {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .search-result-item:hover {
+            background: #334155;
+        }
+        
+        body.dark-mode .leaflet-control-container .leaflet-control {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        body.dark-mode .leaflet-control-zoom a {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        body.dark-mode .leaflet-control-zoom a:hover {
+            background: #334155 !important;
+        }
+        
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        
+        body.dark-mode .btn-close-white {
+            filter: none;
+        }
+        
+        /* Active button styling */
+        body.dark-mode #darkBtn.active,
+        body.dark-mode #lightBtn.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        body.dark-mode #lightBtn.active {
+            background: linear-gradient(135deg, #eab308 0%, #facc15 100%);
+            color: #1e293b;
+        }
+        
+        body.dark-mode .controls-fab {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        }
+        
+        body.dark-mode .controls-fab:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+        }
+    </style>
+`;
+
+// Add styles to page
+if (!document.getElementById('darkModeStyles')) {
+    document.head.insertAdjacentHTML('beforeend', darkModeStyles);
+}
+
+// Function to set theme
+function setTheme(theme) {
+    const isDark = theme === 'dark';
+    
+    // Toggle body class
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    
+    // Update button active states
+    if (darkBtn && lightBtn) {
+        if (isDark) {
+            darkBtn.classList.add('active');
+            lightBtn.classList.remove('active');
+        } else {
+            lightBtn.classList.add('active');
+            darkBtn.classList.remove('active');
+        }
+    }
+    
+    // Update toggle class if exists
+    if (toggle) {
+        if (isDark) {
+            toggle.classList.add('dark-active');
+        } else {
+            toggle.classList.remove('dark-active');
+        }
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('theme', theme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+    setTheme('dark');
+} else {
+    setTheme('light');
+}
+
+// Add event listeners if buttons exist
+if (darkBtn) {
+    darkBtn.addEventListener('click', () => setTheme('dark'));
+}
+if (lightBtn) {
+    lightBtn.addEventListener('click', () => setTheme('light'));
+}
+
+// Optional: Detect system preference
+if (!localStorage.getItem('theme')) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+    }
+}
+
+console.log('Dark mode initialized! 🌙✨');
+  </script>
+
+    <!-- Load Leaflet plugins after Leaflet core -->
+    <script src="https://unpkg.com/leaflet-search/dist/leaflet-search.min.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <script>window.SKYCAST_JAWG_TOKEN = <%- JSON.stringify(typeof jawgAccessToken !== 'undefined' ? jawgAccessToken : '') %>;</script>
+    <script src="/chat-rules.js"></script>
+    <script src="/api-client.js"></script>
+    <script src="/map.js"></script>
+    <script src="/master.js"></script>
+    <script src="/app-enhancements.js"></script>
+    <script src="/v2-features.js"></script>
+    
+    <script>
+        const header = document.getElementById("controlHeader");
+const content = document.getElementById("controlContent");
+const arrow = document.getElementById("arrowIcon");
+
+header.addEventListener("click", () => {
+  content.classList.toggle("active");
+  arrow.classList.toggle("rotate");
+});
+    </script>
+
+    <script>
+        // Hide loading overlay when page is loaded
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Enhanced Search Functionality
+        let searchTimeout;
+        let currentSearchResults = [];
+
+        function initializeSearch() {
+            const searchInput = document.getElementById('mapSearch');
+            const searchResults = document.getElementById('searchResults');
+
+            if (!searchInput || !searchResults) return;
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Handle search result clicks
+            searchResults.addEventListener('click', function(e) {
+                const resultItem = e.target.closest('.search-result-item');
+                if (resultItem) {
+                    const lat = parseFloat(resultItem.dataset.lat);
+                    const lng = parseFloat(resultItem.dataset.lng);
+                    const name = resultItem.dataset.name;
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        if (typeof selectLocationFromSearch === 'function') {
+                            selectLocationFromSearch(lat, lng, name, false);
+                        } else if (typeof map !== 'undefined') {
+                            map.setView([lat, lng], 15);
+                            L.marker([lat, lng]).addTo(map).bindPopup(name).openPopup();
+                        }
+                        searchResults.style.display = 'none';
+                        searchInput.value = name.length > 60 ? name.substring(0, 60) + '...' : name;
+                    }
+                }
+            });
+        }
+
+
+        async function performSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            
+            // Show loading state
+            searchResults.innerHTML = `
+                <div class="search-result-item">
+                    <div class="search-result-text">
+                        <div class="search-result-name">
+                            <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>
+                            Searching...
+                        </div>
+                    </div>
+                </div>
+            `;
+            searchResults.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                displaySearchResults(data.results);
+            } catch (error) {
+                console.error('Search error:', error);
+                displaySearchResults([]);
+            }
+        }
+
+        function displaySearchResults(results) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!results || results.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item"><div class="search-result-text"><div class="search-result-name">No results found</div><div class="search-result-type">Try a different search term</div></div></div>';
+            } else {
+                searchResults.innerHTML = results.map(result => {
+                    // Get icon based on location type
+                    let icon = 'fas fa-map-marker-alt';
+                    if (result.type.includes('city') || result.type.includes('town')) icon = 'fas fa-city';
+                    else if (result.type.includes('airport')) icon = 'fas fa-plane';
+                    else if (result.type.includes('university') || result.type.includes('school')) icon = 'fas fa-graduation-cap';
+                    else if (result.type.includes('hospital')) icon = 'fas fa-hospital';
+                    else if (result.type.includes('restaurant') || result.type.includes('food')) icon = 'fas fa-utensils';
+                    else if (result.type.includes('hotel')) icon = 'fas fa-bed';
+                    else if (result.type.includes('shop') || result.type.includes('store')) icon = 'fas fa-store';
+                    else if (result.type.includes('park')) icon = 'fas fa-tree';
+                    else if (result.type.includes('museum')) icon = 'fas fa-landmark';
+                    
+                    // Truncate long names
+                    const displayName = result.name.length > 60 ? result.name.substring(0, 60) + '...' : result.name;
+                    
+                    return `
+                        <div class="search-result-item" data-lat="${result.lat}" data-lng="${result.lng}" data-name="${result.name}">
+                            <i class="${icon} search-result-icon"></i>
+                            <div class="search-result-text">
+                                <div class="search-result-name">${displayName}</div>
+                                <div class="search-result-type">${result.type.charAt(0).toUpperCase() + result.type.slice(1)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            searchResults.style.display = 'block';
+        }
+
+        // User Dropdown Functionality
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('userDropdown');
+            const toggle = document.querySelector('.dropdown-toggle');
+            
+            if (dropdown && toggle && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Update stats
+        function updateStats() {
+            const saved = JSON.parse(localStorage.getItem("savedLocations") || "[]");
+            const savedCountElement = document.getElementById('savedCount');
+            if (savedCountElement) {
+                savedCountElement.textContent = saved.length;
+            }
+        }
+
+
+        async function refreshAuthNavbar() {
+            const userSection = document.getElementById('userSection');
+            if (!userSection) return;
+            try {
+                const res = await fetch('/api/session', { cache: 'no-store' });
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    window.SKYCAST_USER_ID = data.user.id || data.user._id || true;
+                    const username = data.user.username || 'User';
+                    const initial = username.charAt(0).toUpperCase();
+                    userSection.innerHTML = `
+                        <div class="user-info logged-user-info">
+                            <div class="user-avatar">${initial}</div>
+                            <div class="user-details">
+                                <div class="user-name">${username}</div>
+                                <div class="user-status">Signed in</div>
+                            </div>
+                            <a href="/profile" class="btn btn-outline-primary user-profile-btn">
+                                <i class="fas fa-user"></i> <span>Profile</span>
+                            </a>
+                            <a href="/logout" class="btn btn-primary user-logout-btn">
+                                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                            </a>
+                        </div>`;
+                } else {
+                    window.SKYCAST_USER_ID = null;
+                    userSection.innerHTML = `
+                        <div class="auth-buttons">
+                            <a href="/login" class="btn btn-outline-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
+                            <a href="/signup" class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</a>
+                        </div>`;
+                }
+            } catch (e) {
+                console.warn('Could not refresh auth navbar', e);
+            }
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAuthNavbar();
+            initializeSearch();
+            updateStats();
+            setInterval(updateStats, 5000); // Update every 5 seconds
+        });
+        
+        function toggleControlPanel(e) {
+            if (e) e.stopPropagation();
+            const panel = document.querySelector('.control-panel');
+            const fab = document.querySelector('.controls-fab');
+            if (panel) {
+                panel.classList.toggle('show');
+            }
+            if (fab) {
+                fab.classList.toggle('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

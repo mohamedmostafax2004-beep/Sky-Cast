@@ -1,0 +1,466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Background Animation */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.floating-shapes {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 120px;
+    height: 120px;
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 60px;
+    height: 60px;
+    top: 40%;
+    left: 80%;
+    animation-delay: 4s;
+}
+
+.shape-4 {
+    width: 100px;
+    height: 100px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 1s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Form Container */
+.form-container {
+    width: 450px;
+    margin: 0 auto;
+    padding: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+/* Form Header */
+.form-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #472dbb;
+}
+
+.logo i {
+    margin-right: 10px;
+    font-size: 28px;
+}
+
+h2 {
+    color: #333;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #666;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: #999;
+    font-size: 16px;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.input-wrapper.focused .input-icon {
+    color: #472dbb;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 16px 20px 16px 50px;
+    font-size: 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #472dbb;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(71, 45, 187, 0.1);
+}
+
+.floating-label {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    background: white;
+    padding: 0 5px;
+}
+
+.input-wrapper.focused .floating-label,
+.input-wrapper.has-value .floating-label {
+    top: 0;
+    left: 45px;
+    font-size: 12px;
+    color: #472dbb;
+    font-weight: 600;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    z-index: 2;
+}
+
+.password-toggle:hover {
+    color: #472dbb;
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.remember-me, .terms-checkbox {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+.remember-me input, .terms-checkbox input {
+    margin-right: 8px;
+    width: auto;
+    padding: 0;
+}
+
+.checkmark {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+}
+
+.remember-me input:checked + .checkmark,
+.terms-checkbox input:checked + .checkmark {
+    background: #472dbb;
+    border-color: #472dbb;
+}
+
+.remember-me input:checked + .checkmark::after,
+.terms-checkbox input:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.forgot-password {
+    color: #472dbb;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: #6c5ce7;
+    text-decoration: underline;
+}
+
+.terms-link {
+    color: #472dbb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.terms-link:hover {
+    text-decoration: underline;
+}
+
+/* Submit Button */
+.submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #472dbb 0%, #6c5ce7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(71, 45, 187, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(-1px);
+}
+
+.submit-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-text {
+    margin-right: 8px;
+}
+
+.btn-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.submit-btn:hover .btn-icon {
+    transform: translateX(3px);
+}
+
+/* Password Strength */
+.password-strength {
+    margin-top: 10px;
+}
+
+.strength-bar {
+    width: 100%;
+    height: 4px;
+    background: #e1e5e9;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.strength-text {
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Password Match */
+.password-match {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.password-match.success {
+    color: #2ed573;
+}
+
+.password-match.error {
+    color: #ff4757;
+}
+
+.password-match i {
+    margin-right: 5px;
+}
+
+/* Form Footer */
+.form-footer {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.form-footer p {
+    margin: 10px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.link, .back-link {
+    color: #472dbb;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.link:hover, .back-link:hover {
+    color: #6c5ce7;
+    text-decoration: underline;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.back-link i {
+    margin-right: 5px;
+}
+
+/* Error Message */
+.error-message {
+    background: linear-gradient(135deg, #ff6b7a 0%, #ff4757 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.error-message i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .form-container {
+        width: 90%;
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    h2 {
+        font-size: 24px;
+    }
+    
+    .form-group input {
+        padding: 14px 18px 14px 45px;
+    }
+    
+    .floating-label {
+        left: 45px;
+    }
+    
+    .input-wrapper.focused .floating-label,
+    .input-wrapper.has-value .floating-label {
+        left: 40px;
+    }
+}

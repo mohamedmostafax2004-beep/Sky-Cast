@@ -1,0 +1,30 @@
+{
+  "name": "skycast",
+  "version": "2.1.0",
+  "description": "SkyCast Interactive Map Dashboard",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:db": "node scripts/test-db.js"
+  },
+  "keywords": ["map", "dashboard", "interactive", "leaflet"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.2",
+    "mongoose": "^8.19.0",
+    "mongodb-memory-server": "^10.1.4",
+    "nodemailer": "^6.9.16",
+    "pdfkit": "^0.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

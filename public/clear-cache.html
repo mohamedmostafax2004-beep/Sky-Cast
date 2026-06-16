@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyCast Cache Reset</title>
+  <style>
+    body{font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f7f7fb;color:#222}
+    .box{background:white;padding:28px 34px;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.12);text-align:center;max-width:460px}
+    .spinner{width:34px;height:34px;border:4px solid #ddd;border-top-color:#5b45e8;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="spinner"></div>
+    <h2>Resetting SkyCast cache...</h2>
+    <p>This fixes old login/logout navbar cache during local development.</p>
+  </div>
+  <script>
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((reg) => reg.unregister()));
+        }
+        if (window.caches?.keys) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+      setTimeout(() => location.replace('/?cacheReset=1'), 500);
+    })();
+  </script>
+</body>
+</html>
